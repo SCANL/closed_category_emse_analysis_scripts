@@ -77,7 +77,7 @@ def analyze_table(observed_table, output_prefix):
     chi2_markdown = chi2_header + df_to_markdown(chi2_components.round(6), f"Chi-Square Contributions: {output_prefix.replace('_', ' ').title()}")
     residuals_markdown = bonferroni_header + df_to_markdown(residuals_marked, f"Adjusted Pearson Residuals: {output_prefix.replace('_', ' ').title()}", bold_largest=False)
 
-    with open(f"markdown_{output_prefix}.md", "w") as f:
+    with open(f"../output/markdown_{output_prefix}.md", "w") as f:
         f.write(chi2_markdown)
         f.write("\n")
         f.write(residuals_markdown)

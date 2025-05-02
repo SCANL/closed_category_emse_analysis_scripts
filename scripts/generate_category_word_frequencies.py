@@ -4,8 +4,8 @@ from collections import Counter
 files = {
     "DT": "../data/Statistical Analysis - DT.tsv",  # Determiner
     "CJ": "../data/Statistical Analysis - CJ.tsv",  # Conjunction
-    "D": "../data/Statistical Analysis - D.tsv",     # Digit
-    "P": "../data/Statistical Analysis - P.tsv",     # Preposition
+    "D":  "../data/Statistical Analysis - D.tsv",   # Digit
+    "P":  "../data/Statistical Analysis - P.tsv",   # Preposition
 }
 
 # Closed-category PoS tags to look for in each file
@@ -61,5 +61,6 @@ for i in range(5):
 
 markdown_table = "\n".join([header, separator] + rows)
 
-print("\nMarkdown Table of Top 5 Closed-Category Terms:\n")
-print(markdown_table)
+with open('../output/markdown_table') as f:
+    print("\nMarkdown Table of Top 5 Closed-Category Terms:\n", file=f)
+    print(markdown_table, file=f)
