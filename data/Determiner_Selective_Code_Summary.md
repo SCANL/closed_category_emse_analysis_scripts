@@ -1,0 +1,60 @@
+# Selective Coding Summary by Axial Code (Determiners)
+
+# Core Selective Coding Insight: Determiners in Identifier Names
+
+Determiner-based identifiers help interpret values in relation to a set—by signaling **position**, **filtering criteria**, **thresholds**, or **scoping rules**. These are closed-category terms that enable programmers to express **set logic, entity selection, and relative capacity or validity**, all in the compact form of a name.
+
+They typically support:
+- Positional reasoning (`next`, `last`, `this`)
+- Population membership and filtering (`some`, `any`, `each`, `least`, `which`)
+- Thresholding and extensibility (`enough`, `more`, `additional`)
+- Identity negation or default fallbacks (`no`, `none`, `a`, `without`)
+
+
+## Temporal / Most Recent Element (56 items)
+**Function:** Stores or refers to the **last known state or value**, often to track or compare with more recent activity.  
+**Determiners:** `last`, sometimes `previous`  
+**Behavioral Role:** Captures the outcome of the **most recent execution**, observation, or assignment.  
+**Use Cases:** Undo buffers, recent logs, historical comparison (`lastMessage`, `lastIndex`)
+
+## Temporal / Upcoming Element (49 items)
+**Function:** Points to the **next step** or predicted value in a sequence or control structure.  
+**Determiners:** `next`  
+**Behavioral Role:** Encodes lookahead, preloading, or future-facing logic.  
+**Use Cases:** Buffer traversal, iteration, control prediction (`nextNode`, `nextInstance`)
+
+## Population / Subpopulation Reference (38 items)
+**Function:** Expresses selection from a larger set or group using quantifiers or choice-oriented determiners.  
+**Determiners:** `some`, `any`, `each`, `least`, `which`, `the`  
+**Behavioral Role:** Signals **membership**, **choice**, or **filtering** from a population.  
+**Use Cases:** UI inputs, comparative logic, optional data (`someButton`, `leastCost`, `whichMethod`)
+
+## Immediate Context Reference (25 items)
+**Function:** Refers to **the current scope**, **object**, or structural position.  
+**Determiners:** `this`  
+**Behavioral Role:** Anchors the variable in the **local execution or logical scope**.  
+**Use Cases:** Fluent APIs, current object references, scope flags (`thisInstance`, `thisBlock`, `thisLine`)
+
+## Negation / Exclusion Flag (17 items)
+**Function:** Signals that **something is missing**, **turned off**, or **excluded**.  
+**Determiners:** `no`, `none`, `without`  
+**Behavioral Role:** Boolean negation or disabling logic.  
+**Use Cases:** Configuration toggles, missing-value sentinels (`noCache`, `noFlag`, `withoutValue`)
+
+## Quantity Threshold / Optional Extensibility (4 items)
+**Function:** Describes whether **a minimum resource threshold is met** or **additional inputs are accepted**.  
+**Determiners:** `more`, `enough`, `additional`  
+**Behavioral Role:** Encodes sufficiency or extensibility of inputs.  
+**Use Cases:** Memory bounds, variadic params (`enoughMemory`, `moreFutures`, `additionalGenerators`)
+
+## Default / Fallback Value Representation (2 items)
+**Function:** Represents a **default value** used when a primary condition fails or a required value is missing.  
+**Determiners:** `no`, `a`  
+**Behavioral Role:** Provides a non-active or placeholder value.  
+**Use Cases:** Fallthrough behavior, placeholder parameters (`noVal`, `aVoid`)
+
+## Boolean Multi-Condition Test (2 items)
+**Function:** Boolean flag that is **true only when multiple conditions hold simultaneously**.  
+**Determiners:** `both`, `either`  
+**Behavioral Role:** Conjunction-based truth encoding.  
+**Use Cases:** Paired state conditions (`bothEmpty`, `bothSet`)
