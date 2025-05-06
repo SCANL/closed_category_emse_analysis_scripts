@@ -16,8 +16,24 @@ def summarize_counts_fixed(df, group_col, context_col='context', grammar_col='gr
 
 # === Format Markdown Summary for Each Axial Code ===
 
+LANGUAGE_COUNTS = {"C++": 196,
+                   "JAVA": 226,
+                   "C": 158}
+
 def format_summary_block(summary_data):
     def format_counter(counter, label):
+        if label == "Language":
+            parts = []
+            for lang, count in counter.items():
+                total = LANGUAGE_COUNTS.get(lang.upper(), None)
+                if total:
+                    norm = round(count / total, 2)
+                    parts.append(f"{lang.title().upper()} ({count}, {norm*100:.0f}%)")
+                else:
+                    parts.append(f"{lang.title().upper()} ({count})")
+            return f"**{label}:** " + ", ".join(parts)
+        else:
+            return f"**{label}:** " + ", ".join(f"{k.title()} ({v})" for k, v in counter.items())
         return f"**{label}:** " + ", ".join(f"{k.title().upper()} ({v})" for k, v in counter.items())
     
     contexts_line = format_counter(summary_data["Contexts"], "Contexts")

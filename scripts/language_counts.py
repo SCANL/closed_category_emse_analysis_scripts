@@ -30,9 +30,13 @@ def count_languages(file_path, target_langs):
 
 # Count languages for each file
 all_counts = {}
+total_counts = Counter()
 for name, filename in files.items():
     if os.path.exists(filename):
-        all_counts[name] = count_languages(filename, target_languages)
+        file_counts = count_languages(filename, target_languages)
+        all_counts[name] = file_counts
+        for lang, count in file_counts.items():
+            total_counts[lang] += count
     else:
         print(f"Warning: File not found: {filename}")
         all_counts[name] = {lang: 0 for lang in target_languages}
@@ -41,3 +45,7 @@ for name, filename in files.items():
 print(f"{'File':<15} {'C':>5} {'C++':>5} {'Java':>5}")
 for name, counts in all_counts.items():
     print(f"{name:<15} {counts['C']:>5} {counts['C++']:>5} {counts['Java']:>5}")
+
+# Print total sums
+print("-" * 34)
+print(f"{'TOTAL':<15} {total_counts['C']:>5} {total_counts['C++']:>5} {total_counts['Java']:>5}")
