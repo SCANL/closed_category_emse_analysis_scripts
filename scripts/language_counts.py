@@ -1,51 +1,76 @@
 import os
-from collections import Counter
+import csv
+from collections import Counter, defaultdict
 
-# List of files to process
+# File paths
 files = {
-    "Digit": "../data/Digit Axial Code Annotations - digit_axial_code_dual_axis.tsv",
-    "Conjunction": "../data/Conjunction Axial Code Annotations - conjunction_axial_codes_final.tsv",
-    "Preposition": "../data/Preposition Axial Code Annotations - refined_axial_code_labels_updated.tsv",
-    "Determiner": "../data/Determiner Axial Code Anntoations - determiner_axial_code_validation.tsv"
+    "Digit": "../data/Statistical Analysis - D.tsv",
+    "Conjunction": "../data/Statistical Analysis - CJ.tsv",
+    "Preposition": "../data/Statistical Analysis - P.tsv",
+    "Determiner": "../data/Statistical Analysis - DT.tsv",
+    "Full": "../data/Tagger Open Coding - Name and Grammar Pattern.tsv",
 }
 
-# Languages we care about
+# Target categories and languages
 target_languages = {"C", "C++", "Java"}
+tag_to_category = {"DT": "Determiner", "D": "Digit", "P": "Preposition", "CJ": "Conjunction"}
 
-# Function to count language appearances
-def count_languages(file_path, target_langs):
-    counts = Counter()
+# Helpers
+def process_file(file_path):
     with open(file_path, encoding="utf-8") as f:
-        header = f.readline().strip().split("\t")
-        if "language" not in header:
-            return {lang: 0 for lang in target_langs}
-        lang_idx = header.index("language")
-        for line in f:
-            columns = line.strip().split("\t")
-            if len(columns) > lang_idx:
-                lang = columns[lang_idx]
-                if lang in target_langs:
-                    counts[lang] += 1
-    return {lang: counts.get(lang, 0) for lang in target_langs}
+        reader = csv.DictReader(f, delimiter="\t")
+        return list(reader)
 
-# Count languages for each file
-all_counts = {}
-total_counts = Counter()
-for name, filename in files.items():
-    if os.path.exists(filename):
-        file_counts = count_languages(filename, target_languages)
-        all_counts[name] = file_counts
-        for lang, count in file_counts.items():
-            total_counts[lang] += count
-    else:
-        print(f"Warning: File not found: {filename}")
-        all_counts[name] = {lang: 0 for lang in target_languages}
+def count_by_column(records, column, valid_values):
+    counter = Counter()
+    for row in records:
+        val = row.get(column, "").strip()
+        if val in valid_values:
+            counter[val] += 1
+    return counter
 
-# Print results
-print(f"{'File':<15} {'C':>5} {'C++':>5} {'Java':>5}")
-for name, counts in all_counts.items():
-    print(f"{name:<15} {counts['C']:>5} {counts['C++']:>5} {counts['Java']:>5}")
+def top_closed_category_words(records):
+    word_counter = defaultdict(Counter)
+    for row in records:
+        split = row.get("split", "").strip().split()
+        pattern = row.get("grammar pattern", "").strip().split()
+        if len(split) != len(pattern):
+            continue
+        for word, tag in zip(split, pattern):
+            category = tag_to_category.get(tag)
+            if category:
+                word_counter[category][word] += 1
+    return word_counter
 
-# Print total sums
-print("-" * 34)
-print(f"{'TOTAL':<15} {total_counts['C']:>5} {total_counts['C++']:>5} {total_counts['Java']:>5}")
+# === Process and Aggregate ===
+def summarize_records(name, records):
+    print(f"\n{name} — Language Counts")
+    lang_counts = count_by_column(records, "language", target_languages)
+    for lang in sorted(target_languages):
+        print(f"  {lang}: {lang_counts.get(lang, 0)}")
+
+    print(f"{name} — Context Counts")
+    ctx_counts = count_by_column(records, "context", set())
+    for ctx, count in ctx_counts.most_common():
+        print(f"  {ctx}: {count}")
+
+    print(f"{name} — Top Closed Category Words")
+    word_counts = top_closed_category_words(records)
+    for category, counter in word_counts.items():
+        print(f"  {category}:")
+        for word, count in counter.most_common(10):
+            print(f"    {word}: {count}")
+
+# Run for closed-category files
+for name, path in files.items():
+    if not os.path.exists(path):
+        print(f"Missing file: {name}")
+        continue
+    records = process_file(path)
+    if name != "Full":
+        summarize_records(name, records)
+
+# Separate handling for full file
+print("\n=== FULL DATASET ===")
+full_records = process_file(files["Full"])
+summarize_records("Full", full_records)

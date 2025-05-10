@@ -1,22 +1,48 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import chi2_contingency, norm, chi2
+import os
 
-# === Load Data ===
-df = pd.read_csv("../data/closed_category_language_context.csv") 
+# === Define Input Files ===
+files = {
+    "D": "../data/Statistical Analysis - D.tsv",
+    "CJ": "../data/Statistical Analysis - CJ.tsv",
+    "P": "../data/Statistical Analysis - P.tsv",
+    "DT": "../data/Statistical Analysis - DT.tsv"
+}
 
-# === Define Tables ===
-tag_language_table = df.iloc[0:4, [1, 2, 3]].copy()
-tag_language_table.columns = ['C++', 'Java', 'C']
-tag_language_table.index = ['CJ', 'DT', 'D', 'P']
+# === Initialize Language and Context Counters ===
+language_counts = {}
+context_counts = {}
 
-tag_context_table = df.iloc[6:10, [1, 2, 3, 4, 5]].copy()
-tag_context_table.columns = ['ATTRIBUTE', 'DECLARATION', 'PARAMETER', 'FUNCTION', 'CLASS']
-tag_context_table.index = ['CJ', 'DT', 'D', 'P']
+all_languages = set()
+all_contexts = set()
 
-# === Ensure Numeric Values ===
-tag_language_table = tag_language_table.apply(pd.to_numeric, errors="coerce")
-tag_context_table = tag_context_table.apply(pd.to_numeric, errors="coerce")
+# === Read and Aggregate Counts ===
+for tag, filepath in files.items():
+    df = pd.read_csv(filepath, sep='\t', dtype=str)
+    df['language'] = df['language'].str.strip()
+    df['context'] = df['context'].str.strip()
+
+    lang_count = df['language'].value_counts().to_dict()
+    ctx_count = df['context'].value_counts().to_dict()
+
+    for lang, count in lang_count.items():
+        all_languages.add(lang)
+        language_counts.setdefault(tag, {}).setdefault(lang, 0)
+        language_counts[tag][lang] += count
+
+    for ctx, count in ctx_count.items():
+        all_contexts.add(ctx)
+        context_counts.setdefault(tag, {}).setdefault(ctx, 0)
+        context_counts[tag][ctx] += count
+
+# === Create Tables ===
+tag_language_table = pd.DataFrame(language_counts).fillna(0).astype(int).T
+tag_language_table = tag_language_table.reindex(columns=sorted(all_languages))
+
+tag_context_table = pd.DataFrame(context_counts).fillna(0).astype(int).T
+tag_context_table = tag_context_table.reindex(columns=sorted(all_contexts))
 
 # === Helper to Convert to Markdown ===
 def df_to_markdown(df, caption, bold_largest=True):
@@ -60,8 +86,9 @@ def analyze_table(observed_table, output_prefix):
     residuals_marked[sig_mask] = residuals_df[sig_mask].round(6).astype(str) + " *"
 
     # === Save CSVs ===
-    chi2_components.to_csv(f"chi2_{output_prefix}.csv")
-    residuals_marked.to_csv(f"adjusted_residuals_{output_prefix}.csv")
+    os.makedirs("../output", exist_ok=True)
+    chi2_components.to_csv(f"../output/chi2_{output_prefix}.csv")
+    residuals_marked.to_csv(f"../output/adjusted_residuals_{output_prefix}.csv")
 
     # === Save Markdown with explanatory headers ===
     chi2_header = (
@@ -82,6 +109,6 @@ def analyze_table(observed_table, output_prefix):
         f.write("\n")
         f.write(residuals_markdown)
 
-# === Run Analysis ===
+# === Run Analyses ===
 analyze_table(tag_language_table, "tag_language")
 analyze_table(tag_context_table, "tag_context")
