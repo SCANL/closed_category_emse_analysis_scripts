@@ -1,107 +1,130 @@
-# Selective Coding Summary by Axial Code (All Preposition Categories, Sorted by Frequency)
+# Selective Coding Summary by Axial Code (Prepositions)
 
-# Core Selective Coding Insight: Prepositions in Identifier Names
+## Core Selective Coding Insight: Prepositions in Identifier Names
 
-Prepositions in software identifiers are not merely syntactic residue—they serve critical, functional roles in expressing relationships across values, behaviors, and execution flows.
+Prepositions in code identifiers are not syntactic filler—they establish **semantic relationships** between components, enabling developers to express logic about behavior, context, and transformation in a concise form. Their power lies in how they model **relational meaning**: indicating what a value is used for, derived from, connected to, or operates on.
 
-Across the dataset, prepositions consistently reflect **three dominant semantic functions**:
+Prepositions frequently express one or more of the following:
 
-1. **Data Shaping (Movement and Transformation)**  
-   Prepositions signal how data moves between formats, contexts, or positions.  
-   Includes categories like Type Casting / Interpretation, Data Source / Origin, Data Movement / Transfer, and Deferred Processing.  
-     
-2. **Execution Control (Timing and Activation)**  
-   Prepositions govern when or whether execution occurs, often by binding behavior to conditions, triggers, or configuration flags.  
-   Includes Boolean Flow / Control Flag, Event Callback / Trigger, and Deferred Processing.  
-     
-3. **Contextual Association (Meaning and Scope)**  
-   Prepositions encode how data relates to behaviors, roles, operations, or configuration scopes.  
-   Includes Purpose / Role Annotation, Group Membership, Operation Basis, and Configuration / Grouping Context.
+* **Transformation or Directionality** (e.g., `to_json`, `from_file`)
+* **Temporal or Spatial Position** (e.g., `before_commit`, `at_index`)
+* **Event-based Activation** (e.g., `on_click`, `on_success`)
+* **Semantic Role or Strategy** (e.g., `used_for_testing`, `sort_by_key`)
 
-Additionally, the **relational nature** of prepositions is essential. Even when not expressing literal movement or containment, prepositions construct **semantic links**—between values and the conditions, transformations, or configurations that define their role in the system.
+Importantly, boolean flags that include prepositions can **encode entire behavioral branches**, where the name of the flag serves as a summary of what the guarded behavior entails (e.g., `pass_through`, `used_for_logging`). These have been treated as overlays and combined with other codes below.
 
-This highlights the **relational modeling power of prepositions in code**: they embed logic not just about *what something is*, but *how it participates* in a larger software structure.
+---
 
-## Type Casting / Interpretation (42 items)
-**Function:** Reframe, reinterpret, or transform a value from one representation to another (e.g., `as_type`, `to_element`)  
-**Prepositions:** `as`, `to`, `around`  
-**Behavioral Role:** Declares conversion, reinterpretation, or semantic wrapping  
-**Use Cases:** Casting helpers, type adapters, conversion utilities
+## Type Casting / Interpretation (38 items)
+**Function:** Reinterpret or convert a value into another form or semantic role.
+**Prepositions:** `as`, `to`, `around`
+**Behavioral Role:** Signals semantic transformation or wrapping.
+**Use Cases:** Type coercion, serialization, semantic conversion (`as_binary`, `as_field`)
 
-## Position / Ordering in Time or Space (28 items)
-**Function:** Specify relative position in time, data structure, or execution sequence (e.g., `at_index`, `before`, `after_processing`)  
-**Prepositions:** `at`, `before`, `after`, `in`  
-**Behavioral Role:** Positioning or boundary-setting  
-**Use Cases:** Loop control, memory layout, step sequencing
+## Position / Ordering in Time / Space / Execution Context (28 items)
+**Function:** Denote spatial, structural, or temporal location.
+**Prepositions:** `at`, `before`, `after`, `in`
+**Behavioral Role:** Anchor an element within timelines, structures, or spatial domains.
+**Use Cases:** Indexing, scheduling, memory layout (`before_major`, `before_minor`)
 
-## Boolean Flow / Control Flag (20 items)
-**Function:** Signal whether a behavior is enabled, active, or suppressed based on a condition or context (e.g., `pass_through`, `for_backprop`, `in_best_path`)  
-**Prepositions:** `for`, `in`, `by`, `over`, `through`  
-**Behavioral Role:** Flag-based conditional behavior  
-**Use Cases:** Config flags, toggles, runtime control
-
-## Data Source / Origin (18 items)
-**Function:** Indicate where a value was derived or extracted from (e.g., `from_header`, `from_iterator`, `version_bitmap_from_version`)  
-**Prepositions:** `from` (dominant)  
-**Behavioral Role:** Signals provenance or transformation input  
-**Use Cases:** Mapping, I/O, derived fields, tracing origins
+## Data Source / Origin (20 items)
+**Function:** Indicate the provenance or origin of a value.
+**Prepositions:** `from`
+**Behavioral Role:** Traceability and source awareness.
+**Use Cases:** Data import, transformation inputs (`from_context`, `from_id`)
 
 ## Event Callback / Trigger (17 items)
-**Function:** Attach behavior to a specific event or condition (e.g., `on_status`, `on_start`, `commit_on_success`)  
-**Prepositions:** `on` (dominant)  
-**Behavioral Role:** Event-triggered execution or registration  
-**Use Cases:** UI callbacks, lifecycle hooks, network handlers
+**Function:** Link behavior to a triggering event.
+**Prepositions:** `on`
+**Behavioral Role:** Event-driven execution.
+**Use Cases:** UI handlers, lifecycle events (`on_reason`, `on_start`)
 
-## Deferred Processing / Pending Action (12 items)
-**Function:** Names items that have yet to be processed, serving as a placeholder for future transformation (e.g., `to_merge`, `to_clean`)  
-**Prepositions:** `to`  
-**Behavioral Role:** Scheduling or deferred intent  
-**Use Cases:** Queues, pipelines, post-processing stages
+## Deferred Processing / Pending Action (13 items)
+**Function:** Represent values waiting for future processing.
+**Prepositions:** `to`
+**Behavioral Role:** Queueing, scheduling, deferred intent.
+**Use Cases:** Async queues, staged transformations (`to_ack`, `to_count`)
+
+## Unit-Based Decomposition / Measurement (11 items)
+**Function:** Express normalized or per-instance metrics.
+**Prepositions:** `per`
+**Behavioral Role:** Rate, quantity, or unit tracking.
+**Use Cases:** Aggregation, cost modeling (`down_time`, `size_in_datum`)
+
+## Data Movement / Transfer (10 items)
+**Function:** Indicate data or control movement between components.
+**Prepositions:** `to`, `into`, `onto`
+**Behavioral Role:** Destination or target specification.
+**Use Cases:** Message passing, stream forwarding (`to_repo`, `to_header`)
 
 ## Purpose / Role Annotation (10 items)
-**Function:** Explains the intended role or purpose of a value (e.g., `used_for_logging`, `reserved_for_system`)  
-**Prepositions:** `for`  
-**Behavioral Role:** Intent declaration  
-**Use Cases:** Roles, access control, testing markers
+**Function:** Specify the intended use, role, or scope of a value.
+**Prepositions:** `for`
+**Behavioral Role:** Intent declaration and usage framing.
+**Use Cases:** Role assignments, feature scoping (`for_avg`, `for_class`)
 
-## Data Movement / Transfer (8 items)
-**Function:** Indicates that data or control flow is being directed or moved between components (e.g., `send_to_buffer`, `forward_to_queue`)  
-**Prepositions:** `to`, `into`, `onto`  
-**Behavioral Role:** Specifies the direction or endpoint of movement  
-**Use Cases:** Buffering, data streaming, message passing, forwarding
+## Operation Basis / Strategy (8 items)
+**Function:** Describes the rule, method, or trait that determines how operations may be carried out
+**Prepositions:** `by`, `with`
+**Behavioral Role:** Strategy selection or capability expression.
+**Use Cases:** Sorting, iteration, configuration (`with_charset`, `with_conf`)
 
-## Configuration / Grouping Context (8 items)
-**Function:** Define that a value or behavior is associated with a particular configuration, grouping, or context (e.g., `with_cache`, `with_operator`)  
-**Prepositions:** `with`  
-**Behavioral Role:** Composition and association  
-**Use Cases:** Plugin systems, configuration flags, wrapper functions
-
-## Operation Basis / Strategy (5 items)
-**Function:** Communicates how an operation should be carried out, based on the strategy or parameter specified (e.g., `sort_by_key`, `filter_by_name`)  
-**Prepositions:** `by`  
-**Behavioral Role:** Strategy and method selection  
-**Use Cases:** Sorting, routing, keying, delegation
-
-## Unit-Based Decomposition / Measurement (2 items)
-**Function:** Describes values expressed in terms of smaller units or rates (e.g., `per_user`, `per_frame`, `cost_per_unit`)  
-**Prepositions:** `per`  
-**Behavioral Role:** Quantifies, normalizes, or distributes across instances  
-**Use Cases:** Rate-limited behaviors, resource allocation, aggregation logic
+## Membership / Peer Grouping (7 items)
+**Function:** Indicate inclusion within a logical group or container.
+**Prepositions:** `in`, `among`
+**Behavioral Role:** Collective identity and participation.
+**Use Cases:** Filtering, clustering, participation flags (`in_for`, `in_neighbour_heap`)
 
 ## Mathematical / Constraint Context (2 items)
-**Function:** Use of preposition to express constraint or domain (e.g., `over_limit`, `over_range`)  
-**Prepositions:** `over`  
-**Behavioral Role:** Constraint framing or condition bounding  
-**Use Cases:** Range checks, numeric domains, performance limits
+**Function:** Frame numeric thresholds or logical constraints.
+**Prepositions:** `over`
+**Behavioral Role:** Limit-setting and domain bounding.
+**Use Cases:** Performance constraints, range checks (`over_size`, `vmax_over_base`)
 
-## Other / Miscellaneous (1 items)
-**Function:** Identifier does not clearly fit other categories or is too ambiguous for a confident assignment.  
-**Prepositions:** Varies  
-**Behavioral Role:** Unclear or inconsistent  
-**Use Cases:** Outliers, unclear code intent
+## Boolean Flow / Control Flag x Position / Ordering in Time / Space / Execution context (8 items)
+**Function:** A boolean value that toggles behavior based on position or sequence.
+**Prepositions:** `at`, `in`, `before`
+**Behavioral Role:** Conditional gating tied to timeline or index state.
+**Use Cases:** Flow control, boundary-sensitive behavior (`above_base`, `after_equals`)
 
-## Membership / Peer Grouping (1 items)
-**Function:** Signals inclusion in a peer group or a set (e.g., `among_candidates`)  
-**Prepositions:** `among`  
-**Behavioral Role:** Collective referencing  
-**Use Cases:** Voting sets, comparisons, related elements  
+## Boolean Flow / Control Flag x Operation Basis / Strategy (5 items)
+**Function:** A boolean flag that activates behavior depending on configuration or execution mode.
+**Prepositions:** `by`, `with`
+**Behavioral Role:** Mode-sensitive toggles or strategy selectors.
+**Use Cases:** Feature switches, delegators (`as_warning`, `as_array`)
+
+## Boolean Flow / Control Flag (4 items)
+**Function:** Encodes a binary switch controlling flow or behavior directly.
+**Prepositions:** Varies
+**Behavioral Role:** Global or mode-based enablement.
+**Use Cases:** Runtime flags, conditional modules (`obsess_over_host`, `notified_on`)
+
+## Boolean Flow / Control Flag x Data Source / Origin (2 items)
+**Function:** A boolean toggle indicating whether something derives from a given source.
+**Prepositions:** `from`
+**Behavioral Role:** Activation contingent on source provenance.
+**Use Cases:** Conditional imports, fallback logic (`from_inclusive`, `from_docker_config`)
+
+## Boolean Flow / Control Flag x Purpose / Role Annotation (2 items)
+**Function:** A flag gating behavior tied to a specific role or purpose.
+**Prepositions:** `for`
+**Behavioral Role:** Purpose-aware feature activation.
+**Use Cases:** Feature toggles, scenario-specific flags (`for_backprop`, `for_unknown_schema`)
+
+## Boolean Flow / Control Flag x Type Casting / Interpretation (2 items)
+**Function:** A boolean controlling whether a cast or reinterpretation is performed.
+**Prepositions:** `to`, `as`
+**Behavioral Role:** Conditional transformation behavior.
+**Use Cases:** Runtime safety wrappers, fallback casts (`as_diamond`, `t_for_deser`)
+
+## Boolean Flow / Control Flag x Membership / Peer Grouping (1 item)
+**Function:** A boolean that determines whether an element is included in a logical group.
+**Prepositions:** `in`, `among`
+**Behavioral Role:** Group-based toggles or state assignment.
+**Use Cases:** Flagging participation or visibility (`in_best_path`)
+
+## Boolean Flow / Control Flag x Deferred Processing / Pending Action (1 item)
+**Function:** A boolean indicating whether a deferred action is scheduled.
+**Prepositions:** `to`
+**Behavioral Role:** Intent-to-process signaling.
+**Use Cases:** Queued behavior guards (`wait_for_reload`)

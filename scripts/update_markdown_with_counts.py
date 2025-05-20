@@ -49,7 +49,7 @@ def format_summary_block(summary_data, language_counts):
 
 def patch_markdown(md_text, summary_dict, code_keys, language_counts):
     new_lines = []
-    code_pattern = re.compile(r"^## (.+?) \((\d+) items\)", re.MULTILINE)
+    code_pattern = re.compile(r"^#+\s(.+?)\s\((\d+) items\)", re.MULTILINE)
     last_end = 0
     for match in code_pattern.finditer(md_text):
         code_title = match.group(1).strip()
@@ -57,10 +57,9 @@ def patch_markdown(md_text, summary_dict, code_keys, language_counts):
 
         new_lines.append(md_text[last_end:match.start()])
         new_lines.append(match.group(0))
-
         if code_title in summary_dict and code_title in code_keys:
             after_header = md_text[end_idx:]
-            usecase_match = re.search(r"\*\*Use Cases:\*\*.*?\n", after_header)
+            usecase_match = re.search(r"\*\*Use Cases:\*\*.*?\n", after_header, re.DOTALL)
             if usecase_match:
                 inject_pos = end_idx + usecase_match.end()
                 summary = format_summary_block(summary_dict[code_title], language_counts)
@@ -82,7 +81,7 @@ det_df = pd.read_csv("../data/Determiner Axial Code Anntoations - determiner_axi
 
 language_counts = compute_language_counts(digit_df, conj_df, prep_df, det_df)
 
-digit_df['code_key'] = digit_df['semantic_role'].str.strip() + " × " + digit_df['source_of_meaning'].str.strip()
+digit_df['code_key'] = digit_df['final_axial_code_role'].str.strip() + " x " + digit_df['final_axial_code_meaning'].str.strip()
 digit_summary = summarize_counts_fixed(digit_df, 'code_key')
 digit_md = Path("../data/Digit_Selective_Codes_Dual_Axis.md").read_text()
 digit_keys = list(digit_summary.keys())
