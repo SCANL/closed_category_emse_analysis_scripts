@@ -4,10 +4,6 @@ from collections import Counter, defaultdict
 
 # File paths
 files = {
-    "Digit": "../data/Statistical Analysis - D.tsv",
-    "Conjunction": "../data/Statistical Analysis - CJ.tsv",
-    "Preposition": "../data/Statistical Analysis - P.tsv",
-    "Determiner": "../data/Statistical Analysis - DT.tsv",
     "Full": "../data/Tagger Open Coding - Name and Grammar Pattern.tsv",
 }
 
@@ -42,35 +38,111 @@ def top_closed_category_words(records):
                 word_counter[category][word] += 1
     return word_counter
 
-# === Process and Aggregate ===
 def summarize_records(name, records):
     print(f"\n{name} — Language Counts")
     lang_counts = count_by_column(records, "language", target_languages)
     for lang in sorted(target_languages):
         print(f"  {lang}: {lang_counts.get(lang, 0)}")
 
-    print(f"{name} — Context Counts")
-    ctx_counts = count_by_column(records, "context", set())
-    for ctx, count in ctx_counts.most_common():
-        print(f"  {ctx}: {count}")
+    total_terms = 0
+    terms_per_language = Counter()
+    identifiers_with_pos_tags = Counter()
+    pos_counts_by_language = defaultdict(lambda: Counter())
+    total_per_pos = Counter()
 
-    print(f"{name} — Top Closed Category Words")
-    word_counts = top_closed_category_words(records)
-    for category, counter in word_counts.items():
+    for row in records:
+        lang = row.get("language", "").strip()
+        pattern = row.get("grammar pattern", "").strip().split()
+        if not pattern:
+            continue
+
+        identifiers_with_pos_tags[lang] += 1
+        for tag in pattern:
+            terms_per_language[lang] += 1
+            pos_counts_by_language[lang][tag] += 1
+            total_per_pos[tag] += 1
+            total_terms += 1
+
+    print(f"\n{name} — Totals")
+    print("  Total PoS-tagged terms:", total_terms)
+    print("  Total identifiers with PoS tags per language:")
+    for lang in sorted(target_languages):
+        print(f"    {lang}: {identifiers_with_pos_tags[lang]}")
+    print("  Total PoS-tagged terms per language:")
+    for lang in sorted(target_languages):
+        print(f"    {lang}: {terms_per_language[lang]}")
+
+    print(f"\n{name} — Per-PoS breakdown by language:")
+    for lang in sorted(target_languages):
+        total_lang_terms = terms_per_language[lang]
+        print(f"  {lang}:")
+        for tag in sorted(pos_counts_by_language[lang]):
+            count = pos_counts_by_language[lang][tag]
+            pct = (count / total_lang_terms * 100) if total_lang_terms > 0 else 0
+            print(f"    {tag}: {count} ({pct:.2f}%)")
+
+    print(f"\n{name} — PoS totals across all languages:")
+    sorted_total_pos = sorted(total_per_pos.items(), key=lambda x: x[1], reverse=True)
+    for tag, count in sorted_total_pos:
+        pct = (count / total_terms * 100) if total_terms > 0 else 0
+        print(f"  {tag}: {count} ({pct:.2f}%)")
+
+    print(f"\n{name} — PoS breakdown by context (all languages):")
+    pos_counts_by_context = defaultdict(lambda: Counter())
+    terms_per_context = Counter()
+
+    for row in records:
+        context = row.get("context", "").strip()
+        pattern = row.get("grammar pattern", "").strip().split()
+        for tag in pattern:
+            pos_counts_by_context[context][tag] += 1
+            terms_per_context[context] += 1
+
+    for context in sorted(pos_counts_by_context):
+        print(f"  Context: {context}")
+        total = terms_per_context[context]
+        sorted_tags = sorted(pos_counts_by_context[context].items(), key=lambda x: x[1], reverse=True)
+        for tag, count in sorted_tags:
+            pct = (count / total * 100) if total > 0 else 0
+            print(f"    {tag}: {count} ({pct:.2f}%)")
+    
+    print(f"\n{name} — Identifier counts by context (all languages):")
+    context_counter = Counter()
+
+    for row in records:
+        context = row.get("context", "").strip()
+        if context:
+            context_counter[context] += 1
+
+    total_context_items = sum(context_counter.values())
+    for context, count in context_counter.most_common():
+        pct = (count / total_context_items * 100) if total_context_items > 0 else 0
+        print(f"  {context}: {count} ({pct:.2f}%)")
+    print(f"\n{name} — Most common grammar patterns per closed-category:")
+    pattern_counter_per_category = defaultdict(Counter)
+
+    for row in records:
+        pattern = row.get("grammar pattern", "").strip()
+        tags = pattern.split()
+        if not tags:
+            continue
+
+        found_categories = set()
+        for tag in tags:
+            category = tag_to_category.get(tag)
+            if category:
+                found_categories.add(category)
+
+        for category in found_categories:
+            pattern_counter_per_category[category][pattern] += 1
+
+    for category in sorted(pattern_counter_per_category):
         print(f"  {category}:")
-        for word, count in counter.most_common(10):
-            print(f"    {word}: {count}")
-
-# Run for closed-category files
-for name, path in files.items():
-    if not os.path.exists(path):
-        print(f"Missing file: {name}")
-        continue
-    records = process_file(path)
-    if name != "Full":
-        summarize_records(name, records)
-
-# Separate handling for full file
+        total = sum(pattern_counter_per_category[category].values())
+        for pat, count in pattern_counter_per_category[category].most_common(15):
+            pct = (count / total * 100) if total > 0 else 0
+            print(f"    {pat}: {count} ({pct:.2f}%)")
+# Run
 print("\n=== FULL DATASET ===")
 full_records = process_file(files["Full"])
 summarize_records("Full", full_records)
