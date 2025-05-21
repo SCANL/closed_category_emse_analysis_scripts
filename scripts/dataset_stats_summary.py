@@ -1,3 +1,40 @@
+
+
+def count_closed_category_words(records):
+    word_counter = defaultdict(Counter)
+    for row in records:
+        split = row.get("split", "").strip().split()
+        pattern = row.get("grammar pattern", "").strip().split()
+        if len(split) != len(pattern):
+            continue
+        for word, tag in zip(split, pattern):
+            category = tag_to_category.get(tag)
+            if category:
+                word_counter[category][word] += 1
+    return word_counter
+
+def print_closed_category_word_summary(name, records):
+    print(f"\n{name} — Top Closed Category Words:")
+    word_counter = count_closed_category_words(records)
+    for category in sorted(word_counter):
+        print(f"  {category}:")
+        for word, count in word_counter[category].most_common(10):
+            print(f"    {word}: {count}")
+
+def print_closed_category_identifier_summary(name, records):
+    print(f"\n{name} — Identifier Counts by Closed Category:")
+    total_identifiers = len(records)
+    category_identifier_counts = defaultdict(int)
+    for row in records:
+        pattern = row.get("grammar pattern", "").strip().split()
+        if any(tag in tag_to_category for tag in pattern):
+            for tag in pattern:
+                if tag in tag_to_category:
+                    category_identifier_counts[tag_to_category[tag]] += 1
+    print(f"  Total identifiers: {total_identifiers}")
+    for category, count in category_identifier_counts.items():
+        print(f"  {category}: {count} ({(count/total_identifiers)*100:.2f}%)")
+
 import os
 import csv
 from collections import Counter, defaultdict
@@ -5,6 +42,10 @@ from collections import Counter, defaultdict
 # File paths
 files = {
     "Full": "../data/Tagger Open Coding - Name and Grammar Pattern.tsv",
+    "Determiner": "../data/Determiner Axial Code Anntoations - determiner_axial_code_validation.tsv",
+    "Digit": "../data/Digit Axial Code Annotations - digit_axial_code_dual_axis.tsv",
+    "Preposition": "../data/Preposition Axial Code Annotations - refined_axial_code_labels_updated.tsv",
+    "Conjunction": "../data/Conjunction Axial Code Annotations - conjunction_axial_codes_final.tsv",
 }
 
 # Target categories and languages
@@ -142,7 +183,19 @@ def summarize_records(name, records):
         for pat, count in pattern_counter_per_category[category].most_common(15):
             pct = (count / total * 100) if total > 0 else 0
             print(f"    {pat}: {count} ({pct:.2f}%)")
-# Run
-print("\n=== FULL DATASET ===")
+
+# Global Report
+print("\n=== GLOBAL REPORT ===")
 full_records = process_file(files["Full"])
-summarize_records("Full", full_records)
+summarize_records("Global", full_records)
+print_closed_category_identifier_summary("Global", full_records)
+print_closed_category_word_summary("Global", full_records)
+
+# Per-Closed-Category Reports
+print("\n=== PER-CLOSED-CATEGORY REPORTS ===")
+for category in ["Determiner", "Digit", "Preposition", "Conjunction"]:
+    print(f"\n--- {category.upper()} REPORT ---")
+    records = process_file(files[category])
+    summarize_records(category, records)
+    print_closed_category_identifier_summary(category, records)
+    print_closed_category_word_summary(category, records)

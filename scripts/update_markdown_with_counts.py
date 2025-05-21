@@ -48,29 +48,39 @@ def format_summary_block(summary_data, language_counts):
 # === Patch Markdown Content ===
 
 def patch_markdown(md_text, summary_dict, code_keys, language_counts):
-    new_lines = []
     code_pattern = re.compile(r"^#+\s(.+?)\s\((\d+) items\)", re.MULTILINE)
     last_end = 0
+    new_lines = []
+    
     for match in code_pattern.finditer(md_text):
         code_title = match.group(1).strip()
+        start_idx = match.start()
         end_idx = match.end()
+        next_section_start = code_pattern.search(md_text[end_idx:])
 
-        new_lines.append(md_text[last_end:match.start()])
-        new_lines.append(match.group(0))
+        section_end = next_section_start.start() + end_idx if next_section_start else len(md_text)
+        section = md_text[end_idx:section_end]
+
         if code_title in summary_dict and code_title in code_keys:
-            after_header = md_text[end_idx:]
-            usecase_match = re.search(r"\*\*Use Cases:\*\*.*?\n", after_header, re.DOTALL)
-            if usecase_match:
-                inject_pos = end_idx + usecase_match.end()
-                summary = format_summary_block(summary_dict[code_title], language_counts)
-                new_lines.append(md_text[end_idx:inject_pos])
-                new_lines.append(summary)
-                last_end = inject_pos
-                continue
-        last_end = end_idx
+            summary_data = summary_dict[code_title]
+            grammar_line = format_summary_block(summary_data, language_counts).split("\n")[1]
+            language_line = format_summary_block(summary_data, language_counts).split("\n")[2]
+
+            section = re.sub(
+                r"\*\*Grammar patterns:\*\*.*?\n", f"{grammar_line}\n", section
+            )
+            section = re.sub(
+                r"\*\*Language:\*\*.*?\n", f"{language_line}\n", section
+            )
+
+        new_lines.append(md_text[last_end:start_idx])
+        new_lines.append(md_text[start_idx:end_idx])
+        new_lines.append(section)
+        last_end = section_end
 
     new_lines.append(md_text[last_end:])
     return "".join(new_lines)
+
 
 # === Example Usage ===
 
