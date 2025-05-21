@@ -1,5 +1,32 @@
 
 
+def print_closed_category_context_breakdown(name, records):
+    print(f"\n{name} — Closed Category Breakdown by Context:")
+    category_context_counts = defaultdict(lambda: Counter())
+    context_totals = Counter()
+    category_totals = Counter()
+
+    for row in records:
+        context = row.get("context", "").strip()
+        pattern = row.get("grammar pattern", "").strip().split()
+        found_categories = set()
+        for tag in pattern:
+            category = tag_to_category.get(tag)
+            if category:
+                found_categories.add(category)
+        for category in found_categories:
+            category_context_counts[category][context] += 1
+            context_totals[context] += 1
+            category_totals[category] += 1
+
+    for category in sorted(category_context_counts):
+        print(f"  {category}:")
+        for context, count in category_context_counts[category].most_common():
+            context_total = context_totals[context]
+            category_total = category_totals[category]
+            pct_context = (count / context_total * 100) if context_total > 0 else 0
+            pct_category = (count / category_total * 100) if category_total > 0 else 0
+            print(f"    {context}: {count} ({pct_context:.2f}% of context, {pct_category:.2f}% of {category}) out of {category_total})")
 def count_closed_category_words(records):
     word_counter = defaultdict(Counter)
     for row in records:
@@ -10,7 +37,7 @@ def count_closed_category_words(records):
         for word, tag in zip(split, pattern):
             category = tag_to_category.get(tag)
             if category:
-                word_counter[category][word] += 1
+                word_counter[category][word.lower()] += 1
     return word_counter
 
 def print_closed_category_word_summary(name, records):
@@ -18,8 +45,10 @@ def print_closed_category_word_summary(name, records):
     word_counter = count_closed_category_words(records)
     for category in sorted(word_counter):
         print(f"  {category}:")
+        total = sum(word_counter[category].values())
         for word, count in word_counter[category].most_common(10):
-            print(f"    {word}: {count}")
+            pct = (count / total * 100) if total > 0 else 0
+            print(f"    {word}: {count} ({pct:.2f}%)")
 
 def print_closed_category_identifier_summary(name, records):
     print(f"\n{name} — Identifier Counts by Closed Category:")
@@ -27,10 +56,13 @@ def print_closed_category_identifier_summary(name, records):
     category_identifier_counts = defaultdict(int)
     for row in records:
         pattern = row.get("grammar pattern", "").strip().split()
-        if any(tag in tag_to_category for tag in pattern):
-            for tag in pattern:
-                if tag in tag_to_category:
-                    category_identifier_counts[tag_to_category[tag]] += 1
+        found_categories = set()
+        for tag in pattern:
+            category = tag_to_category.get(tag)
+            if category:
+                found_categories.add(category)
+        for category in found_categories:
+            category_identifier_counts[category] += 1
     print(f"  Total identifiers: {total_identifiers}")
     for category, count in category_identifier_counts.items():
         print(f"  {category}: {count} ({(count/total_identifiers)*100:.2f}%)")
@@ -120,7 +152,7 @@ def summarize_records(name, records):
         for tag in sorted(pos_counts_by_language[lang]):
             count = pos_counts_by_language[lang][tag]
             pct = (count / total_lang_terms * 100) if total_lang_terms > 0 else 0
-            print(f"    {tag}: {count} ({pct:.2f}%)")
+            print(f"    {tag}: {count} ({pct:.2f}%) out of {total_lang_terms}")
 
     print(f"\n{name} — PoS totals across all languages:")
     sorted_total_pos = sorted(total_per_pos.items(), key=lambda x: x[1], reverse=True)
@@ -145,7 +177,7 @@ def summarize_records(name, records):
         sorted_tags = sorted(pos_counts_by_context[context].items(), key=lambda x: x[1], reverse=True)
         for tag, count in sorted_tags:
             pct = (count / total * 100) if total > 0 else 0
-            print(f"    {tag}: {count} ({pct:.2f}%)")
+            print(f"    {tag}: {count} ({pct:.2f}%) out of {total}")
     
     print(f"\n{name} — Identifier counts by context (all languages):")
     context_counter = Counter()
@@ -189,6 +221,7 @@ print("\n=== GLOBAL REPORT ===")
 full_records = process_file(files["Full"])
 summarize_records("Global", full_records)
 print_closed_category_identifier_summary("Global", full_records)
+print_closed_category_context_breakdown("Global", full_records)
 print_closed_category_word_summary("Global", full_records)
 
 # Per-Closed-Category Reports
