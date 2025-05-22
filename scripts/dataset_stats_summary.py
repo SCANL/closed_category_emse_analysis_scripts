@@ -26,7 +26,7 @@ def print_closed_category_context_breakdown(name, records):
             category_total = category_totals[category]
             pct_context = (count / context_total * 100) if context_total > 0 else 0
             pct_category = (count / category_total * 100) if category_total > 0 else 0
-            print(f"    {context}: {count} ({pct_context:.2f}% of context, {pct_category:.2f}% of {category}) out of {category_total})")
+            print(f"    {context}: {count} ({pct_context:.2f}% of context out of {context_total}, {pct_category:.2f}% of {category} out of {category_total})")
 def count_closed_category_words(records):
     word_counter = defaultdict(Counter)
     for row in records:
