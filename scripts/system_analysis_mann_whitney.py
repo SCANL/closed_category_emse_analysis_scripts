@@ -1,8 +1,10 @@
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import mannwhitneyu
+from statsmodels.stats.multitest import multipletests
 
 # Load the CSV files
 domain_raw = pd.read_csv('../data/word_system_stats_with_sloc_domain.csv')
@@ -61,26 +63,20 @@ for threshold in thresholds:
         print("Skipped due to empty dataset after filtering.")
         continue
 
-    domain_sorted = domain_df.sort_values(by='log_normalized_system_count', ascending=False)
-    general_sorted = general_df.sort_values(by='log_normalized_system_count', ascending=False)
-
     stat, p_value = mannwhitneyu(
-        domain_sorted['log_normalized_system_count'],
-        general_sorted['log_normalized_system_count'],
+        domain_df['log_normalized_system_count'],
+        general_df['log_normalized_system_count'],
         alternative='greater'
     )
 
-    print(f"Mann-Whitney U Test Statistic: {stat:.2f}")
-    print(f"p-value: {p_value:.6e}")
-
     global_summary_results.append({
         'threshold': threshold,
-        'domain_count': len(domain_sorted),
-        'general_count': len(general_sorted),
-        'domain_mean': domain_sorted['log_normalized_system_count'].mean(),
-        'general_mean': general_sorted['log_normalized_system_count'].mean(),
-        'domain_median': domain_sorted['log_normalized_system_count'].median(),
-        'general_median': general_sorted['log_normalized_system_count'].median(),
+        'domain_count': len(domain_df),
+        'general_count': len(general_df),
+        'domain_mean': domain_df['log_normalized_system_count'].mean(),
+        'general_mean': general_df['log_normalized_system_count'].mean(),
+        'domain_median': domain_df['log_normalized_system_count'].median(),
+        'general_median': general_df['log_normalized_system_count'].median(),
         'statistic': stat,
         'p_value': p_value
     })
@@ -117,18 +113,21 @@ for threshold in thresholds:
             'general_median': general_subset['log_normalized_system_count'].median(),
             'statistic': stat_cat,
             'p_value': p_value_cat,
-            'cliffs_delta': delta
+            'cliffs_delta': delta,
+            'low_sample_warning': (len(domain_subset) < 20 or len(general_subset) < 20)
         })
 
 # Save all threshold global results
 global_summary_df = pd.DataFrame(global_summary_results)
+global_summary_df['fdr_corrected_p'] = multipletests(global_summary_df['p_value'], method='fdr_bh')[1]
 global_summary_df['neg_log10_p'] = -np.log10(global_summary_df['p_value'])
-global_summary_df.to_csv('../output/threshold_mannwhitney_summary.csv', index=False)
+global_summary_df.to_csv('../output/threshold_mannwhitney_summary_fdr.csv', index=False)
 
 # Save all per-category results
 per_category_df = pd.DataFrame(per_category_all_results)
+per_category_df['fdr_corrected_p'] = multipletests(per_category_df['p_value'], method='fdr_bh')[1]
 per_category_df['neg_log10_p'] = -np.log10(per_category_df['p_value'])
-per_category_df.to_csv('../output/per_category_mannwhitney_summary.csv', index=False)
+per_category_df.to_csv('../output/per_category_mannwhitney_summary_fdr.csv', index=False)
 
 # --- Plot global p-values ---
 plt.figure(figsize=(10, 6))
@@ -156,4 +155,27 @@ plt.tight_layout()
 plt.savefig('../output/threshold_significance_per_category.png')
 plt.close()
 
-print("\nSaved global and per-category plots to output directory.")
+print("\nSaved global and per-category results with FDR correction and low-sample warnings.")
+
+
+# --- Plot Cliff's Delta per category ---
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=per_category_df, x='threshold', y='cliffs_delta', hue='category', marker='o')
+
+# Add interpretation bands
+plt.axhspan(-0.147, 0.147, color='gray', alpha=0.1, label='negligible')
+plt.axhspan(0.147, 0.33, color='yellow', alpha=0.1, label='small')
+plt.axhspan(0.33, 0.474, color='orange', alpha=0.1, label='medium')
+plt.axhspan(0.474, 1.0, color='red', alpha=0.1, label='large')
+plt.axhspan(-0.33, -0.147, color='yellow', alpha=0.1)
+plt.axhspan(-0.474, -0.33, color='orange', alpha=0.1)
+plt.axhspan(-1.0, -0.474, color='red', alpha=0.1)
+
+plt.title("Cliff's Delta per Category Across Thresholds")
+plt.xlabel('Minimum Support Threshold (Proportion of Systems)')
+plt.ylabel("Cliff's Delta")
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.legend(title='Closed-Category')
+plt.tight_layout()
+plt.savefig('../output/cliffs_delta_per_category.png')
+plt.close()

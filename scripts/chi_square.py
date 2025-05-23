@@ -87,12 +87,14 @@ def analyze_table(observed_table, output_prefix):
     )
     bonferroni_alpha = alpha / num_tests
     bonferroni_header = (
-        f"Adjusted Pearson’s Residuals Results. With Bonferroni Correction, a significant result is "
-        f"α = {alpha:.2f}/{num_tests} = {bonferroni_alpha:.4f}, which translates to a ± {critical_z:.2f} critical value.\n\n"
+        f"Standardized Pearson Residuals. These residuals account for marginal effects and help identify which cells most strongly contribute to the overall association.\n\n"
+        f"Bonferroni Correction: While the global chi-squared test evaluates independence, the Bonferroni-adjusted z-threshold highlights cells with unusually high deviation. "
+        f"Significance threshold: α = {alpha:.2f}/{num_tests} = {bonferroni_alpha:.4f}, which translates to a ± {critical_z:.2f} z-score.\n\n"
     )
 
     chi2_md = chi2_header + df_to_markdown(chi2_components.round(6), f"Chi-Square Contributions: {output_prefix.replace('_', ' ').title()}")
-    residuals_md = bonferroni_header + df_to_markdown(residuals_marked, f"Adjusted Pearson Residuals: {output_prefix.replace('_', ' ').title()}", bold_largest=False)
+    residuals_md = bonferroni_header + df_to_markdown(residuals_marked, f"Standardized Residuals (Bonferroni-Adjusted): {output_prefix.replace('_', ' ').title()}", bold_largest=False)
+
 
     with open(f"../output/markdown_{output_prefix}.md", "w") as f:
         f.write(chi2_md)

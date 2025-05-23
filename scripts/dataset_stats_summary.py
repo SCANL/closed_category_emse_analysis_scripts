@@ -52,7 +52,7 @@ def print_closed_category_word_summary(name, records):
 
 def print_closed_category_identifier_summary(name, records):
     print(f"\n{name} — Identifier Counts by Closed Category:")
-    total_identifiers = len(records)
+    total_identifiers = 0
     category_identifier_counts = defaultdict(int)
     for row in records:
         pattern = row.get("grammar pattern", "").strip().split()
@@ -62,8 +62,9 @@ def print_closed_category_identifier_summary(name, records):
             if category:
                 found_categories.add(category)
         for category in found_categories:
+            total_identifiers += 1
             category_identifier_counts[category] += 1
-    print(f"  Total identifiers: {total_identifiers}")
+    print(f"  Total verified identifiers: {total_identifiers}")
     for category, count in category_identifier_counts.items():
         print(f"  {category}: {count} ({(count/total_identifiers)*100:.2f}%)")
 
