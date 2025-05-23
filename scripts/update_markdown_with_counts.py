@@ -36,6 +36,16 @@ def format_summary_block(summary_data, language_counts):
                 else:
                     parts.append(f"{lang_upper} ({count})")
             return f"**{label}:** " + ", ".join(parts)
+
+        elif label == "Grammar patterns":
+            # Sort by count descending, capitalize all grammar patterns
+            sorted_items = sorted(counter.items(), key=lambda x: -x[1])
+            parts = [
+                f"{' '.join(w.upper() for w in k.split())} ({v})"
+                for k, v in sorted_items
+            ]
+            return f"**{label}:** " + ", ".join(parts)
+
         else:
             return f"**{label}:** " + ", ".join(f"{k.title()} ({v})" for k, v in counter.items())
 
@@ -45,15 +55,17 @@ def format_summary_block(summary_data, language_counts):
 
     return f"{contexts_line}\n{grammar_line}\n{language_line}\n"
 
+
 # === Patch Markdown Content ===
 
 def patch_markdown(md_text, summary_dict, code_keys, language_counts):
     code_pattern = re.compile(r"^#+\s(.+?)\s\((\d+) items\)", re.MULTILINE)
     last_end = 0
     new_lines = []
-    
+
     for match in code_pattern.finditer(md_text):
         code_title = match.group(1).strip()
+        item_count = int(match.group(2))
         start_idx = match.start()
         end_idx = match.end()
         next_section_start = code_pattern.search(md_text[end_idx:])
@@ -63,6 +75,16 @@ def patch_markdown(md_text, summary_dict, code_keys, language_counts):
 
         if code_title in summary_dict and code_title in code_keys:
             summary_data = summary_dict[code_title]
+            grammar_patterns_count = sum(summary_data['Grammar patterns'].values())
+
+            print(f"Checking '{code_title}':")
+            print(f"  - Markdown says: {item_count} items")
+            print(f"  - Actual grammar pattern count: {grammar_patterns_count}")
+            if grammar_patterns_count == item_count:
+                print("  ✅ Counts match.")
+            else:
+                print("  ❌ Mismatch detected.")
+
             grammar_line = format_summary_block(summary_data, language_counts).split("\n")[1]
             language_line = format_summary_block(summary_data, language_counts).split("\n")[2]
 
@@ -80,6 +102,7 @@ def patch_markdown(md_text, summary_dict, code_keys, language_counts):
 
     new_lines.append(md_text[last_end:])
     return "".join(new_lines)
+
 
 
 # === Example Usage ===
@@ -116,3 +139,5 @@ Path("../output/Digit_Selective_Codes_Dual_Axis_UPDATED.md").write_text(patched_
 Path("../output/Conjunction_Selective_Code_Summary_UPDATED.md").write_text(patched_conj_md)
 Path("../output/Preposition_Selective_Code_Summary_UPDATED.md").write_text(patched_prep_md)
 Path("../output/Determiner_Selective_Code_Summary_UPDATED.md").write_text(patched_det_md)
+
+print("\nAll done! Find the output in ../output/*_Summary_UPDATED")
