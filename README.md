@@ -12,7 +12,7 @@ Contains all analysis and data-processing scripts:
   Computes Fleiss’ Kappa for inter-annotator agreement across axial and grammar pattern codes.
 
 - **`chi_square.py`**  
-  Performs chi-squared tests on grammar pattern distributions across programming languages and structural contexts (RQ1).
+  Performs chi-squared tests on grammar pattern distributions across programming languages and structural contexts (RQ2).
 
 - **`dataset_stats_summary.py`**  
   Generates descriptive statistics on:
@@ -63,8 +63,10 @@ To run any script:
    cd scripts/
    ```
 3. Execute the desired script:
+    ```
     python calculate_fleiss_kappa.py
     python chi_square.py
     python dataset_stats_summary.py
     python system_analysis_mann_whitney.py
     python update_markdown_with_counts.py
+    ```
